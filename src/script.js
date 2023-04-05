@@ -3,6 +3,15 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
 
 /**
+ * Textures
+ */
+const textureLoader = new THREE.TextureLoader()
+const bakedShadow = textureLoader.load('/textures/bakedShadow.jpg')
+const simpleShadow = textureLoader.load('/textures/simpleShadow.jpg')
+
+
+
+/**
  * Base
  */
 // Debug
@@ -31,7 +40,7 @@ gui.add(directionalLight.position, 'y').min(- 5).max(5).step(0.001)
 gui.add(directionalLight.position, 'z').min(- 5).max(5).step(0.001)
 scene.add(directionalLight)
 
-directionalLight.castShadow = true
+directionalLight.castShadow = false
 
 directionalLight.shadow.mapSize.width = 1024
 directionalLight.shadow.mapSize.height = 1024
@@ -56,7 +65,7 @@ scene.add(directionalLightCameraHelper)
 
 const spotLight = new THREE.SpotLight(0xffffff, 0.3, 10, Math.PI * 0.3 )
 
-spotLight.castShadow = true
+spotLight.castShadow = false
 
 spotLight.shadow.mapSize.width = 1024
 spotLight.shadow.mapSize.height = 1024
@@ -85,7 +94,7 @@ pointLight.shadow.mapSize.height = 1024
 pointLight.shadow.camera.near = 0.1
 pointLight.shadow.camera.far = 5
 
-pointLight.castShadow = true
+pointLight.castShadow = false
 
 pointLight.position.set(- 1, 1, 0)
 scene.add(pointLight)
@@ -109,17 +118,32 @@ const sphere = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 32, 32),
     material
 )
-
 sphere.castShadow = true
+
 
 const plane = new THREE.Mesh(
     new THREE.PlaneGeometry(5, 5),
-    material
+    new THREE.MeshBasicMaterial({
+        
+    })
+    
 )
 plane.rotation.x = - Math.PI * 0.5
 plane.position.y = - 0.5
 
 scene.add(sphere, plane)
+const sphereShadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.5, 1.5),
+    new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        transparent: true,
+        alphaMap: simpleShadow
+    })
+)
+sphereShadow.rotation.x = - Math.PI * 0.5
+sphereShadow.position.y = plane.position.y + 0.01
+
+scene.add(sphere, sphereShadow, plane)
 
 plane.receiveShadow = true
 /**
@@ -179,6 +203,15 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+
+    //Update the sphere
+    sphere.position.x = Math.cos(elapsedTime) * 1.5
+    sphere.position.z = Math.sin(elapsedTime) * 1.5
+    sphere.position.y = Math.abs(Math.sin(elapsedTime * 3))
+    //Update shadow
+    sphereShadow.position.x = sphere.position.x
+    sphereShadow.position.z = sphere.position.z
+    sphereShadow.material.opacity = (1 - sphere.position.y) * 0.6
 
     // Update controls
     controls.update()
