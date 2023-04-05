@@ -41,11 +41,29 @@ directionalLight.shadow.camera.bottom = - 2
 directionalLight.shadow.camera.left = - 2
 directionalLight.shadow.camera.near = 1
 directionalLight.shadow.camera.far = 6
+// directionalLight.shadow.radius = 10
 
 
 
 const directionalLightCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+directionalLightCameraHelper.visible = false
 scene.add(directionalLightCameraHelper)
+
+
+
+
+//SpotLight
+
+const spotLight = new THREE.SpotLight(0xffffff, 0.4, 10, Math.PI * 0.3 )
+
+spotLight.castShadow = true
+
+spotLight.position.set(0 , 2, 2)
+scene.add(spotLight)
+scene.add(spotLight.target)
+
+const spotLightCameraHelper = new THREE.CameraHelper(spotLight.shadow.camera)
+scene.add(spotLightCameraHelper)
 
 /**
  * Materials
@@ -122,6 +140,7 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 renderer.shadowMap.enabled = true 
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
 /**
  * Animate
